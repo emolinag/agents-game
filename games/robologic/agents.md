@@ -16,8 +16,11 @@ Cuadrícula fija (ej. 4x4, 6x6, 3x2) donde el usuario coloca los items.
 - **Exit**: recibe un robot aceptado.
 
 ## Controles
-- **Q / E**: selecciona item Switch.
+- **Q**: selecciona un item Switch.
+- **E**: selecciona el otro item Switch.
 - **Z**: selecciona item Band.
+- **R**: selecciona item Robot.
+- **T**: selecciona item Stamper.
 - **X**: selecciona item Pipe.
 - **C**: selecciona item Junker.
 - **V**: selecciona item Exit.
@@ -25,6 +28,8 @@ Cuadrícula fija (ej. 4x4, 6x6, 3x2) donde el usuario coloca los items.
 - **Flechas**: mueve el item sobre el escenario.
 - **Enter**: fija el item en el escenario.
 - **Click izquierdo**: selecciona o fija el item.
+
+En pantalla, la botonera del escenario refleja estas teclas: la paleta tiene un botón por ítem y la barra de acciones incluye orientación (↑/←/↓/→), confirmar, quitar, ejecutar y reiniciar.
 
 ## Interacciones entre ítems
 El robot recorre los ítems colocados hasta llegar al Junker o al Exit:
@@ -55,7 +60,11 @@ El robot recorre los ítems colocados hasta llegar al Junker o al Exit:
 - `GameClass` (`js/GameClass.js`) representa el juego entero (menús, escenario y objetos) y es el orquestador. Carga los niveles (`LEVELS` → `LevelClass`), arranca delegando en `MenuClass` y expone a las pantallas `getLevels()`, `getCanvas()` y `getMouse()`.
 - `MenuClass` (`js/MenuClass.js`) es el menú principal: opciones con etiqueta y acción, navegación con ↑/↓, `Enter` y clic/toque, y resaltado por hover. La opción **Levels** abre `LevelsClass`.
 - `LevelsClass` (`js/LevelsClass.js`) extiende `MenuClass` y arma las opciones con los niveles disponibles; al elegir uno abre `BoardClass`.
-- `BoardClass` (`js/BoardClass.js`) es el escenario: dibuja la cuadrícula del nivel y con `Esc` vuelve a la lista.
+- `BoardClass` (`js/BoardClass.js`) es el escenario: reparte la pantalla con `LayoutClass`, dibuja la cuadrícula del nivel y su botonera (`PaletteClass` + `ActionsClass`), y con `Esc` o el botón Volver vuelve a la lista.
+- `LayoutClass` (`js/LayoutClass.js`) calcula las regiones de la pantalla del escenario (cabecera, tablero y botonera) a partir del tamaño del canvas y su orientación.
+- `ButtonClass` (`js/ButtonClass.js`) es un botón genérico: un rectángulo con etiqueta, color de acento y una acción; sabe si está seleccionado o bajo el cursor.
+- `PaletteClass` (`js/PaletteClass.js`) es la paleta de ítems: un botón por ítem, con selección por clic/toque o por tecla, y resaltado del ítem elegido.
+- `ActionsClass` (`js/ActionsClass.js`) es la barra de acciones del escenario (orientación, confirmar, quitar, ejecutar, reiniciar); cada botón delega en `BoardClass.doAction(id)`.
 - `LevelClass` (`js/LevelClass.js`) representa un nivel ya cargado (tamaño, string de entrada y strings de verificación).
 - Cada objeto sabe cómo dibujarse. Los ítems reciben el canvas en su constructor y lo usan en `draw`.
 - No todo objeto es dibujable: los objetos de lógica pura no se representan.
@@ -72,6 +81,22 @@ La aplicación es una cadena de pantallas. `AppClass` siempre delega en `GameCla
 - **Esc**: cada pantalla se cierra y la anterior vuelve a mostrarse (en el escenario, vuelve a la lista de niveles).
 - Un **toque** en celular se trata como clic izquierdo.
 - La opción bajo el cursor se resalta en cada frame leyendo `getMouse()`.
+
+## Layout y botones del escenario
+
+`BoardClass` reparte la pantalla con `LayoutClass` según el aspecto del contenedor:
+
+- **Ancho** (PC y celular en horizontal): cabecera arriba, botonera en una columna a la izquierda y tablero a la derecha.
+- **Alto** (celular en vertical): cabecera arriba, tablero al centro y botonera al pie.
+
+La **cabecera** muestra el número de nivel y el botón **Volver**. La **botonera** tiene dos partes:
+
+- **Paleta** (`PaletteClass`): un botón por ítem (Robot, Band, Stamper, Switch, Pipe, Junker, Exit). El ítem seleccionado queda resaltado y se elige con clic/toque o con su tecla.
+- **Acciones** (`ActionsClass`): orientación (↑ / ← / ↓ / →, equivale a `W`/`S`/`D`/`A`), **OK** (confirmar, `Enter`), **X** (quitar el ítem de la celda), **▶** (ejecutar la simulación) y **⟲** (reiniciar el nivel).
+
+Todos los botones son `ButtonClass`. La cantidad de columnas se adapta a la orientación: la paleta usa 2 columnas en ancho y 7 en alto; las acciones usan 2 columnas en ancho y 4 en alto.
+
+La colocación en ratón/celular es **tocando la celda** con el ítem ya seleccionado, y la orientación se cambia con los botones de la barra de acciones (todavía pendiente de implementar la lógica).
 
 ## Contrato del target
 
@@ -101,7 +126,8 @@ Abrir `games/robologic/index.html` directamente en el navegador o servirlo con c
 
 ## Pendientes
 - Definir el formato de los strings de entrada y verificación e interpretarlos al dibujar el escenario.
-- Implementar lógica de colocación, rotación y movimiento de ítems.
-- Implementar simulación del recorrido del robot y condiciones de victoria/derrota.
-- Implementar controles táctiles del juego (el menú ya responde a toques).
+- Implementar la colocación de ítems (tocar la celda), la rotación, el confirmar y el quitar: los botones ya están cableados a `BoardClass` (`rotate`, `confirm`, `removeItem`), pero esos métodos son placeholders.
+- Implementar la ejecución de la simulación (`runLevel`), el reiniciar (`resetLevel`) y las condiciones de victoria/derrota.
+- Completar los controles táctiles del escenario (los menús y la botonera ya responden a toques).
+- Reemplazar los íconos de la paleta por representaciones de cada ítem cuando se diseñen (hoy usan color + etiqueta).
 - Ajustar canvas para móviles y PC (por ejemplo, escalado para pantallas de alta densidad).
