@@ -1,0 +1,16 @@
+.game-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  background: #111;
+}
+
+canvas {
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
+  background: #000;
+}
